@@ -21,7 +21,19 @@ impl Ray {
     pub fn point_at_parameter(&self, t: f32) -> Vec3 {
         self.a.clone() + (self.b.clone() * t)
     }
+    pub fn hit_sphere(&self, center: &Vec3, radius: f32) -> bool {
+        let oc: Vec3 = self.origin().clone() - center.clone();
+        let a = Vec3::dot(self.direction(), self.direction());
+        let b = 2.0 * Vec3::dot(&oc, self.direction());
+        let c = Vec3::dot(&oc, &oc) - radius * radius;
+        let discriminant = b * b - 4.0 * a * c;
+        discriminant > 0.0
+    }
     pub fn color(&self) -> Vec3 {
+        let cen = Vec3 { x: 0.0, y: 0.0, z: -1.0 };
+        if self.hit_sphere(&cen, 0.5) {
+            return Vec3 { x: 1.0, y: 0.0, z: 0.0 };
+        }
         let unit_direction = Vec3::unit_vector(self.direction().clone());
         let t = 0.5 * (unit_direction.y + 1.0);
         Vec3 { x: 1.0, y: 1.0, z: 1.0 } * (1.0 - t) + Vec3 { x: 0.5, y: 0.7, z: 1.0 } * t

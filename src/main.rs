@@ -5,7 +5,7 @@ use ray_tracing_in_one_weekend::Ray;
 use ray_tracing_in_one_weekend::vec::Vec3;
 
 fn main() {
-    let path = "images/chapter_3_image.ppm";
+    let path = "images/chapter_4_image.ppm";
     let mut f = File::create(path).unwrap();
     let nx = 200;
     let ny = 100;

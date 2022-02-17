@@ -1,5 +1,5 @@
 use std::fmt::{Display, Formatter};
-use std::ops::{Add, Div, Mul};
+use std::ops::{Add, Div, Mul, Sub};
 
 #[derive(Copy, Clone)]
 pub struct Vec3 {
@@ -7,7 +7,6 @@ pub struct Vec3 {
     pub y: f32,
     pub z: f32,
 }
-
 
 impl Vec3 {
     pub fn new(x: f32, y: f32, z: f32) -> Vec3 {
@@ -23,6 +22,9 @@ impl Vec3 {
     pub fn length(&self) -> f32 {
         f32::sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
     }
+    pub fn dot(v1: &Vec3, v2: &Vec3) -> f32 {
+        v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
+    }
 }
 
 impl Div<f32> for Vec3 {
@@ -33,6 +35,18 @@ impl Div<f32> for Vec3 {
             x: self.x / rhs,
             y: self.y / rhs,
             z: self.z / rhs,
+        }
+    }
+}
+
+impl Sub<Vec3> for Vec3 {
+    type Output = Vec3;
+
+    fn sub(self, rhs: Vec3) -> Self::Output {
+        Vec3 {
+            x: self.x - rhs.x,
+            y: self.x - rhs.y,
+            z: self.x - rhs.z,
         }
     }
 }
@@ -69,6 +83,7 @@ impl Add<Vec3> for Vec3 {
 
 #[cfg(test)]
 mod tests {
+    use assert_approx_eq::assert_approx_eq;
     use crate::Vec3;
 
     #[test]
@@ -90,5 +105,14 @@ mod tests {
         let vec3_2 = Vec3::new(1.5, 3.3, 0.1);
         let added_vec = vec3 + vec3_2;
         assert_eq!(format!("{}", added_vec), "2.5 5.3 3.1");
+    }
+
+    #[test]
+    fn check_dot() {
+        let vec3 = Vec3::new(1.0, 2.0, 3.0);
+        let vec3_2 = Vec3::new(1.5, 3.3, 0.1);
+        let f = Vec3::dot(&vec3, &vec3_2);
+        assert_approx_eq!(8.4, f, 1e-4f32);
+
     }
 }
