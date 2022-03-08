@@ -26,47 +26,18 @@ impl Ray {
 }
 
 pub fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
-    let oc: Vec3 = calc_oc(r.origin().clone(), center.clone());
-    let a = calc_a(r.direction());
-    let b = calc_b(&oc, r.direction());
-    let c = calc_c(&oc, radius);
-    let discriminant = calc_discriminant(a, b, c);
+    let oc: Vec3 = r.origin().clone() - center.clone();
+    let a = r.direction().length_squared();
+    let half_b = vec::dot(&oc, r.direction());
+    let c = oc.length_squared() - radius * radius;
+    let discriminant = half_b * half_b - a * c;
     return if discriminant < 0.0 {
         -1.0
     } else {
-        (-b - discriminant.sqrt()) / (2.0 * a)
+        (-half_b - discriminant.sqrt()) / a
     };
 }
 
-pub fn hit_sphere_old(center: &Point3, radius: f64, r: &Ray) -> bool {
-    let oc: Vec3 = calc_oc(r.origin().clone(), center.clone());
-    let a = calc_a(r.direction());
-    let b = calc_b(&oc, r.direction());
-    let c = calc_c(&oc, radius);
-    let discriminant = calc_discriminant(a, b, c);
-    return discriminant > 0.0;
-}
-
-pub fn calc_discriminant(a: f64, b: f64, c: f64) -> f64 {
-    b * b - 4.0 * a * c
-}
-
-
-fn calc_oc(origin: Vec3, center: Vec3) -> Vec3 {
-    origin - center
-}
-
-fn calc_a(direction: &Vec3) -> f64 {
-    vec::dot(direction, direction)
-}
-
-fn calc_b(oc: &Vec3, direction: &Vec3) -> f64 {
-    2.0 * vec::dot(oc, direction)
-}
-
-fn calc_c(oc: &Vec3, radius: f64) -> f64 {
-    vec::dot(oc, oc) - radius * radius
-}
 
 pub fn ray_color(ray: &Ray) -> Color {
     let cen = Point3::new(0.0, 0.0, -1.0);
@@ -75,16 +46,6 @@ pub fn ray_color(ray: &Ray) -> Color {
         let x = ray.at(t) - Point3::new(0.0, 0.0, -1.0);
         let n = vec::unit_vector(&x);
         return Color::new(n.x + 1.0, n.y + 1.0, n.z + 1.0) * 0.5;
-    }
-    let unit_direction = vec::unit_vector(ray.direction());
-    let t = 0.5 * (unit_direction.y + 1.0);
-    (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
-}
-
-pub fn ray_color_old(ray: &Ray) -> Color {
-    let cen = Point3::new(0.0, 0.0, -1.0);
-    if hit_sphere_old(&cen, 0.5, &ray) {
-        return Color::new(1.0, 0.0, 0.0);
     }
     let unit_direction = vec::unit_vector(ray.direction());
     let t = 0.5 * (unit_direction.y + 1.0);
@@ -108,57 +69,6 @@ mod tests {
     }
 
     #[test]
-    fn check_calc_discriminant() {
-        let a = 10.0;
-        let b = 5.0;
-        let c = 1.0;
-        let res = calc_discriminant(a, b, c);
-        assert_approx_eq!(-15.0,res, 1e-4);
-    }
-
-    #[test]
-    fn check_calc_res() {
-        let a = 10.0;
-        let b = 5.0;
-        let disc = 4.0f64;
-        let res = (-b - disc.sqrt()) / (2.0 * a);
-        assert_approx_eq!(-0.35,res, 1e-4);
-    }
-
-    #[test]
-    fn check_calc_oc() {
-        let origin = Point3::new(0.0, 0.0, 0.0);
-        let cen = Point3::new(0.0, 0.0, -1.0);
-        let oc = calc_oc(origin, cen);
-        assert_approx_eq!(0.0,oc.x, 1e-4);
-        assert_approx_eq!(0.0,oc.y, 1e-4);
-        assert_approx_eq!(1.0,oc.z, 1e-4);
-    }
-
-    #[test]
-    fn check_calc_a() {
-        let direction = Vec3::new(1.0, 2.0, 3.0);
-        let f = calc_a(&direction);
-        assert_approx_eq!(14.0, f, 1e-4);
-    }
-
-    #[test]
-    fn check_calc_b() {
-        let oc = Point3::new(0.0, 0.0, 1.0);
-        let direction = Point3::new(2.0, 3.0, 4.0);
-        let res = calc_b(&oc, &direction);
-        assert_approx_eq!(8.0,res, 1e-4);
-    }
-
-    #[test]
-    fn check_calc_c() {
-        let oc = Point3::new(0.0, 0.0, 1.0);
-        let radius = 0.5;
-        let res = calc_c(&oc, radius);
-        assert_approx_eq!(0.75,res, 1e-4);
-    }
-
-    #[test]
     fn hit_sphere_test() {
         let a = Vec3::new(0.0, 0.0, 0.0);
         let b = Vec3::new(-0.075744917850181004, 0.5714285714285714, -1.0);
@@ -168,5 +78,4 @@ mod tests {
         let low_root = hit_sphere(&center, 0.5, &ray);
         assert_approx_eq!(-0.433185,low_root, 1e-4);
     }
-
 }
