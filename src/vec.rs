@@ -34,8 +34,8 @@ pub fn cross(v1: &Vec3, v2: &Vec3) -> Vec3 {
     )
 }
 
-pub fn unit_vector(vec: &Vec3) -> Vec3 {
-    vec.clone() / vec.length()
+pub fn unit_vector(vec: Vec3) -> Vec3 {
+    vec / vec.length()
 }
 
 impl Div<f64> for Vec3 {
@@ -176,7 +176,7 @@ mod tests {
     #[test]
     fn check_unit_vector() {
         let vec3 = Vec3::new(1.0, 2.0, 2.0);
-        let unit_vec = vec::unit_vector(&vec3);
+        let unit_vec = vec::unit_vector(vec3);
         assert_approx_eq!(vec3.x/3.0, unit_vec.x, 1e-4);
         assert_approx_eq!(vec3.y/3.0, unit_vec.y, 1e-4);
         assert_approx_eq!(vec3.z/3.0, unit_vec.z, 1e-4);
