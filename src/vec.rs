@@ -1,5 +1,5 @@
 use std::fmt::{Display, Formatter};
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 pub type Color = Vec3;
 pub type Point3 = Vec3;
@@ -108,6 +108,14 @@ impl Add<Vec3> for Vec3 {
 
     fn add(self, rhs: Vec3) -> Self::Output {
         Vec3 { x: self.x + rhs.x, y: self.y + rhs.y, z: self.z + rhs.z }
+    }
+}
+
+impl Neg for Vec3 {
+    type Output = Vec3;
+
+    fn neg(self) -> Self::Output {
+        Vec3::new(-self.x, -self.y, -self.z)
     }
 }
 
