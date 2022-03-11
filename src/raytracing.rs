@@ -1,6 +1,8 @@
 use std::f64::consts::PI;
 use std::rc::Rc;
 
+use rand::Rng;
+
 use crate::{vec, Vec3};
 use crate::color::Color;
 use crate::vec::Point3;
@@ -153,6 +155,14 @@ pub fn ray_color(ray: &Ray, world: &dyn Hittable) -> Color {
 
 pub fn degrees_to_radians(degrees: f64) -> f64 {
     degrees * PI / 180.0
+}
+
+pub fn random_double() -> f64 {
+    rand::thread_rng().gen_range(0.0..1.0)
+}
+
+pub fn random_double_range(min: f64, max: f64) -> f64 {
+    rand::thread_rng().gen_range(min..max)
 }
 
 #[cfg(test)]
