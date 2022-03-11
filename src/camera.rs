@@ -9,7 +9,6 @@ pub struct Camera {
     lower_left_corner: Vec3,
 }
 
-
 impl Camera {
     pub fn new() -> Camera {
         Default::default()
