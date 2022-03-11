@@ -1,7 +1,6 @@
 use std::fmt::{Display, Formatter};
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
-pub type Color = Vec3;
 pub type Point3 = Vec3;
 
 #[derive(Copy, Clone, Debug,Default)]

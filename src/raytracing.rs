@@ -165,6 +165,8 @@ pub fn random_double_range(min: f64, max: f64) -> f64 {
     rand::thread_rng().gen_range(min..max)
 }
 
+
+
 #[cfg(test)]
 mod tests {
     use assert_approx_eq::assert_approx_eq;
