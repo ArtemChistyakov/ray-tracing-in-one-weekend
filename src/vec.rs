@@ -4,7 +4,7 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 pub type Color = Vec3;
 pub type Point3 = Vec3;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug,Default)]
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,

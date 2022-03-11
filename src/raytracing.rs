@@ -1,13 +1,17 @@
+use std::rc::Rc;
+
 use crate::{vec, Vec3};
 use crate::color::Color;
 use crate::vec::Point3;
 
+#[derive(Default)]
 pub struct HitRecord {
     p: Point3,
     normal: Vec3,
     t: f64,
     front_face: bool,
 }
+
 
 impl HitRecord {
     pub fn set_face_normal(&mut self, r: &Ray, outward_normal: Vec3) {
@@ -21,7 +25,34 @@ impl HitRecord {
 }
 
 pub trait Hittable {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool;
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
+}
+
+pub struct HittableList {
+    objects: Vec<Rc<dyn Hittable>>,
+}
+
+impl HittableList {
+    pub fn clear(&mut self) {
+        self.objects.clear();
+    }
+    pub fn add(&mut self, object: Rc<dyn Hittable>) {
+        self.objects.push(object);
+    }
+}
+
+impl Hittable for HittableList {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+        let mut temp_rec = None;
+        let mut closest_so_far = t_max;
+        for object in &self.objects {
+            if let Some(hit_rec) = object.hit(r, t_min, t_max) {
+                closest_so_far = hit_rec.t;
+                temp_rec = Some(hit_rec);
+            }
+        }
+        temp_rec
+    }
 }
 
 pub struct Sphere {
@@ -36,29 +67,30 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let oc: Vec3 = r.origin() - self.center;
         let a = r.direction().length_squared();
         let half_b = vec::dot(&oc, &r.direction());
         let c = oc.length_squared() - self.radius * self.radius;
         let discriminant = half_b * half_b - a * c;
         if discriminant < 0.0 {
-            return false;
+            return None;
         }
         let sqrtd = discriminant.sqrt();
         let root = (-half_b - sqrtd) / a;
         if root < t_min || root > t_max {
             let root = (-half_b + sqrtd) / a;
             if root < t_min || root > t_max {
-                return false;
+                return None;
             }
         }
+        let mut rec = HitRecord::default();
         rec.t = root;
         rec.p = r.at(rec.t);
         let outward_normal = (rec.p - self.center) / self.radius;
         rec.set_face_normal(r, outward_normal);
 
-        true
+        Some(rec)
     }
 }
 
