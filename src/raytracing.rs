@@ -1,3 +1,4 @@
+use std::f64::consts::PI;
 use std::rc::Rc;
 
 use crate::{vec, Vec3};
@@ -33,6 +34,16 @@ pub struct HittableList {
 }
 
 impl HittableList {
+    pub fn new() -> HittableList {
+        HittableList {
+            objects: Vec::new()
+        }
+    }
+    pub fn with_capacity(initial_capacity: usize) -> HittableList {
+        HittableList {
+            objects: Vec::with_capacity(initial_capacity)
+        }
+    }
     pub fn clear(&mut self) {
         self.objects.clear();
     }
@@ -131,17 +142,17 @@ pub fn hit_sphere(center: Point3, radius: f64, r: &Ray) -> f64 {
 }
 
 
-pub fn ray_color(ray: &Ray) -> Color {
-    let cen = Point3::new(0.0, 0.0, -1.0);
-    let t = hit_sphere(cen, 0.5, ray);
-    if t > 0.0 {
-        let x = ray.at(t) - Point3::new(0.0, 0.0, -1.0);
-        let n = vec::unit_vector(x);
-        return Color::new(n.x + 1.0, n.y + 1.0, n.z + 1.0) * 0.5;
+pub fn ray_color(ray: &Ray, world: &dyn Hittable) -> Color {
+    if let Some(hit_record) = world.hit(ray, 0.0, f64::INFINITY) {
+        return 0.5 * (hit_record.normal + Color::new(1.0, 1.0, 1.0));
     }
     let unit_direction = vec::unit_vector(ray.direction());
     let t = 0.5 * (unit_direction.y + 1.0);
     (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0)
+}
+
+pub fn degrees_to_radians(degrees: f64) -> f64 {
+    degrees * PI / 180.0
 }
 
 #[cfg(test)]
