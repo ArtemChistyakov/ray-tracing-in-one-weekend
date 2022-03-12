@@ -130,25 +130,12 @@ impl Ray {
     }
 }
 
-pub fn hit_sphere(center: Point3, radius: f64, r: &Ray) -> f64 {
-    let oc: Vec3 = r.origin() - center;
-    let a = r.direction().length_squared();
-    let half_b = vec::dot(&oc, &r.direction());
-    let c = oc.length_squared() - radius * radius;
-    let discriminant = half_b * half_b - a * c;
-    if discriminant < 0.0 {
-        -1.0
-    } else {
-        (-half_b - discriminant.sqrt()) / a
-    }
-}
-
 
 pub fn ray_color(ray: &Ray, world: &dyn Hittable,depth: usize) -> Color {
     if depth == 0 {
         return Color::new(0.0,0.0,0.0);
     }
-    if let Some(hit_record) = world.hit(ray, 0.0, f64::INFINITY) {
+    if let Some(hit_record) = world.hit(ray, 0.001, f64::INFINITY) {
         let target = hit_record.p + hit_record.normal + Vec3::random_in_unit_sphere();
         let new_ray = Ray::new(hit_record.p,target-hit_record.p);
         return 0.5 * ray_color(&new_ray,world,depth-1);
@@ -176,7 +163,7 @@ pub fn random_double_range(min: f64, max: f64) -> f64 {
 mod tests {
     use assert_approx_eq::assert_approx_eq;
 
-    use crate::raytracing::{hit_sphere, Ray};
+    use crate::raytracing::{ Ray};
     use crate::Vec3;
     use crate::vec::Point3;
 
@@ -186,16 +173,5 @@ mod tests {
         let b = Vec3::new(2.5, 2.0, 3.0);
         let ray = Ray::new(a, b);
         assert_eq!(format!("{}", ray.at(2 as f64)), "6 6.5 9.8");
-    }
-
-    #[test]
-    fn hit_sphere_test() {
-        let a = Vec3::new(0.0, 0.0, 0.0);
-        let b = Vec3::new(-0.075744917850181004, 0.5714285714285714, -1.0);
-
-        let ray = Ray::new(a, b);
-        let center = Point3::new(0.0, 0.0, 0.0);
-        let low_root = hit_sphere(center, 0.5, &ray);
-        assert_approx_eq!(-0.433185,low_root, 1e-4);
     }
 }
