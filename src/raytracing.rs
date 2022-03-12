@@ -144,9 +144,14 @@ pub fn hit_sphere(center: Point3, radius: f64, r: &Ray) -> f64 {
 }
 
 
-pub fn ray_color(ray: &Ray, world: &dyn Hittable) -> Color {
+pub fn ray_color(ray: &Ray, world: &dyn Hittable,depth: usize) -> Color {
+    if depth == 0 {
+        return Color::new(0.0,0.0,0.0);
+    }
     if let Some(hit_record) = world.hit(ray, 0.0, f64::INFINITY) {
-        return 0.5 * (hit_record.normal + Color::new(1.0, 1.0, 1.0));
+        let target = hit_record.p + hit_record.normal + Vec3::random_in_unit_sphere();
+        let new_ray = Ray::new(hit_record.p,target-hit_record.p);
+        return 0.5 * ray_color(&new_ray,world,depth-1);
     }
     let unit_direction = vec::unit_vector(ray.direction());
     let t = 0.5 * (unit_direction.y + 1.0);

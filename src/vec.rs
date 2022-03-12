@@ -1,9 +1,11 @@
 use std::fmt::{Display, Formatter};
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
+use crate::raytracing::{random_double, random_double_range};
+
 pub type Point3 = Vec3;
 
-#[derive(Copy, Clone, Debug,Default)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,
@@ -19,6 +21,20 @@ impl Vec3 {
     }
     pub fn length_squared(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
+    }
+    pub fn random() -> Vec3 {
+        Vec3::new(random_double(), random_double(), random_double())
+    }
+    pub fn random_in_range(min: f64, max: f64) -> Vec3 {
+        Vec3::new(random_double_range(min, max), random_double_range(min, max), random_double_range(min, max))
+    }
+    pub fn random_in_unit_sphere() -> Vec3 {
+        loop {
+            let ran = Vec3::random_in_range(-1.0, 1.0);
+            if ran.length_squared() < 1.0 {
+                return ran;
+            }
+        }
     }
 }
 

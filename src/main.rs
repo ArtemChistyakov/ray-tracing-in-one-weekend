@@ -9,7 +9,7 @@ use ray_tracing_in_one_weekend::raytracing::{HittableList, random_double, ray_co
 use ray_tracing_in_one_weekend::vec::{Point3};
 
 fn main() {
-    let path = "images/chapter_7.2_image.ppm";
+    let path = "images/chapter_8.1_image.ppm";
     let mut f = File::create(path).unwrap();
 
     //image
@@ -17,6 +17,7 @@ fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
     let samples_per_pixel = 100;
+    let max_depth = 50;
 
     // World
     let mut world: HittableList = HittableList::with_capacity(2);
@@ -35,7 +36,7 @@ fn main() {
                 let u = (i as f64 + random_double()) / (image_width - 1) as f64;
                 let v = (j as f64 + random_double()) / (image_height - 1) as f64;
                 let r = camera.get_ray(u, v);
-                pixel_color = pixel_color + ray_color(&r, &world);
+                pixel_color = pixel_color + ray_color(&r, &world,max_depth);
             }
             color::write_color(&mut f, &pixel_color, samples_per_pixel);
         }
