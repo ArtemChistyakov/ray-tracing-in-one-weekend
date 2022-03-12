@@ -9,7 +9,7 @@ use ray_tracing_in_one_weekend::raytracing::{HittableList, random_double, ray_co
 use ray_tracing_in_one_weekend::vec::{Point3};
 
 fn main() {
-    let path = "images/chapter_8.3_image.ppm";
+    let path = "images/chapter_8.5_image.ppm";
     let mut f = File::create(path).unwrap();
 
     //image

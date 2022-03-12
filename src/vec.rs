@@ -36,6 +36,9 @@ impl Vec3 {
             }
         }
     }
+    pub fn random_unit_vector() -> Vec3 {
+        unit_vector(Vec3::random_in_unit_sphere())
+    }
 }
 
 pub fn dot(v1: &Vec3, v2: &Vec3) -> f64 {
