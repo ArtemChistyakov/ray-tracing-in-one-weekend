@@ -39,6 +39,14 @@ impl Vec3 {
     pub fn random_unit_vector() -> Vec3 {
         unit_vector(Vec3::random_in_unit_sphere())
     }
+    pub fn near_zero(&self) -> bool {
+        let s = 1e-8;
+        return (self.x.abs() < s) && (self.y.abs() < s) && (self.z.abs() < s);
+    }
+}
+
+pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {
+    v - 2.0 * dot(&v, &n) * n
 }
 
 pub fn dot(v1: &Vec3, v2: &Vec3) -> f64 {
@@ -94,6 +102,14 @@ impl Mul<Vec3> for f64 {
             y: rhs.y * self,
             z: rhs.z * self,
         }
+    }
+}
+
+impl Mul<Vec3> for Vec3 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        Vec3::new(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z)
     }
 }
 

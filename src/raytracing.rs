@@ -5,25 +5,29 @@ use rand::Rng;
 
 use crate::{vec, Vec3};
 use crate::color::Color;
+use crate::material::{ Scatter};
 use crate::vec::Point3;
 
-#[derive(Default)]
 pub struct HitRecord {
-    p: Point3,
-    normal: Vec3,
-    t: f64,
-    front_face: bool,
+    pub p: Point3,
+    pub normal: Vec3,
+    pub mat_ptr: Rc<dyn Scatter>,
+    pub t: f64,
+    pub front_face: bool,
 }
 
 
 impl HitRecord {
-    pub fn set_face_normal(&mut self, r: &Ray, outward_normal: Vec3) {
-        self.front_face = vec::dot(&r.direction(), &outward_normal) < 0.0;
+    pub fn set_face_normal(&mut self, r: &Ray) {
+        self.front_face = vec::dot(&r.direction(), &self.normal) < 0.0;
         self.normal = if self.front_face {
-            outward_normal
+            self.normal
         } else {
-            -outward_normal
+            -self.normal
         };
+    }
+    pub fn new(p: Point3, normal: Vec3, mat_ptr: Rc<dyn Scatter>, t: f64) -> HitRecord {
+        HitRecord { p, normal, mat_ptr, t, front_face: false }
     }
 }
 
@@ -71,11 +75,12 @@ impl Hittable for HittableList {
 pub struct Sphere {
     center: Point3,
     radius: f64,
+    mat_ptr: Rc<dyn Scatter>,
 }
 
 impl Sphere {
-    pub fn new(center: Point3, radius: f64) -> Sphere {
-        Sphere { center, radius }
+    pub fn new(center: Point3, radius: f64, mat_ptr: Rc<dyn Scatter>) -> Sphere {
+        Sphere { center, radius, mat_ptr }
     }
 }
 
@@ -97,11 +102,13 @@ impl Hittable for Sphere {
                 return None;
             }
         }
-        let mut rec = HitRecord::default();
-        rec.t = root;
-        rec.p = r.at(rec.t);
-        let outward_normal = (rec.p - self.center) / self.radius;
-        rec.set_face_normal(r, outward_normal);
+
+        let t = root;
+        let p = r.at(t);
+        let outward_normal = (p - self.center) / self.radius;
+        let mat_ptr = Rc::clone(&self.mat_ptr);
+        let mut rec = HitRecord::new(p, outward_normal, mat_ptr, t);
+        rec.set_face_normal(r);
 
         Some(rec)
     }
@@ -131,14 +138,15 @@ impl Ray {
 }
 
 
-pub fn ray_color(ray: &Ray, world: &dyn Hittable,depth: usize) -> Color {
+pub fn ray_color(ray: &Ray, world: &dyn Hittable, depth: usize) -> Color {
     if depth == 0 {
-        return Color::new(0.0,0.0,0.0);
+        return Color::new(0.0, 0.0, 0.0);
     }
     if let Some(hit_record) = world.hit(ray, 0.001, f64::INFINITY) {
-        let target = hit_record.p + hit_record.normal + Vec3::random_unit_vector();
-        let new_ray = Ray::new(hit_record.p,target-hit_record.p);
-        return 0.5 * ray_color(&new_ray,world,depth-1);
+        if let Some((scattered, attenuation)) = hit_record.mat_ptr.scatter(ray, &hit_record) {
+            return attenuation * ray_color(&scattered, world, depth - 1);
+        }
+        return Color::new(0.0, 0.0, 0.0);
     }
     let unit_direction = vec::unit_vector(ray.direction());
     let t = 0.5 * (unit_direction.y + 1.0);
@@ -158,12 +166,11 @@ pub fn random_double_range(min: f64, max: f64) -> f64 {
 }
 
 
-
 #[cfg(test)]
 mod tests {
     use assert_approx_eq::assert_approx_eq;
 
-    use crate::raytracing::{ Ray};
+    use crate::raytracing::Ray;
     use crate::Vec3;
     use crate::vec::Point3;
 
