@@ -5,7 +5,7 @@ use rand::Rng;
 
 use crate::{vec, Vec3};
 use crate::color::Color;
-use crate::material::{ Scatter};
+use crate::material::Scatter;
 use crate::vec::Point3;
 
 pub struct HitRecord {
@@ -63,7 +63,7 @@ impl Hittable for HittableList {
         let mut temp_rec = None;
         let mut closest_so_far = t_max;
         for object in &self.objects {
-            if let Some(hit_rec) = object.hit(r, t_min, t_max) {
+            if let Some(hit_rec) = object.hit(r, t_min, closest_so_far) {
                 closest_so_far = hit_rec.t;
                 temp_rec = Some(hit_rec);
             }
@@ -95,9 +95,9 @@ impl Hittable for Sphere {
             return None;
         }
         let sqrtd = discriminant.sqrt();
-        let root = (-half_b - sqrtd) / a;
+        let mut root = (-half_b - sqrtd) / a;
         if root < t_min || root > t_max {
-            let root = (-half_b + sqrtd) / a;
+            root = (-half_b + sqrtd) / a;
             if root < t_min || root > t_max {
                 return None;
             }
@@ -113,6 +113,7 @@ impl Hittable for Sphere {
         Some(rec)
     }
 }
+
 
 pub struct Ray {
     orig: Vec3,

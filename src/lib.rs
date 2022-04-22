@@ -1,3 +1,5 @@
+extern crate core;
+
 use crate::vec::Vec3;
 
 pub mod vec;
