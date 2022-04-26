@@ -7,10 +7,10 @@ use ray_tracing_in_one_weekend::color;
 use ray_tracing_in_one_weekend::color::Color;
 use ray_tracing_in_one_weekend::material::{Dielectric, Lambertian, Metal};
 use ray_tracing_in_one_weekend::raytracing::{HittableList, random_double, ray_color, Sphere};
-use ray_tracing_in_one_weekend::vec::Point3;
+use ray_tracing_in_one_weekend::vec::{Point3, Vec3};
 
 fn main() {
-    let path = "images/image_14.ppm";
+    let path = "images/image_17.ppm";
     let mut f = File::create(path).unwrap();
 
     //image
@@ -26,14 +26,18 @@ fn main() {
     let material_left = Rc::new(Dielectric::new(1.5));
     let material_right = Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 0.0));
 
-    let mut world: HittableList = HittableList::with_capacity(4);
-    world.add(Rc::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, material_center)));
-    world.add(Rc::new(Sphere::new(Point3::new(-1.0, 0.0, -1.0), -0.4, material_left)));
-    world.add(Rc::new(Sphere::new(Point3::new(1.0, 0.0, -1.0), 0.5, material_right)));
-    world.add(Rc::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0, material_ground)));
+    let mut world: HittableList = HittableList::with_capacity(5);
+
+    world.add(Rc::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0, material_ground.clone())));
+    world.add(Rc::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5, material_center.clone())));
+    world.add(Rc::new(Sphere::new(Point3::new(-1.0, 0.0, -1.0), 0.5, material_left.clone())));
+    world.add(Rc::new(Sphere::new(Point3::new(-1.0, 0.0, -1.0), -0.45, material_left.clone())));
+    world.add(Rc::new(Sphere::new(Point3::new(1.0, 0.0, -1.0), 0.5, material_right.clone())));
 
 
-    let camera = Camera::new();
+
+    let camera = Camera::new(Point3::new(-2.0, 2.0, 1.0), Point3::new(0.0, 0.0, -1.0),
+                             Vec3::new(0.0, 1.0, 0.0), 20.0, aspect_ratio);
 
     //render
     writeln!(f, "P3\n{} {}\n255", image_width, image_height).unwrap();
