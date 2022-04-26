@@ -10,7 +10,7 @@ use ray_tracing_in_one_weekend::raytracing::{HittableList, random_double, ray_co
 use ray_tracing_in_one_weekend::vec::{Point3, Vec3};
 
 fn main() {
-    let path = "images/image_17.ppm";
+    let path = "images/image_18.ppm";
     let mut f = File::create(path).unwrap();
 
     //image
@@ -35,9 +35,13 @@ fn main() {
     world.add(Rc::new(Sphere::new(Point3::new(1.0, 0.0, -1.0), 0.5, material_right.clone())));
 
 
-
-    let camera = Camera::new(Point3::new(-2.0, 2.0, 1.0), Point3::new(0.0, 0.0, -1.0),
-                             Vec3::new(0.0, 1.0, 0.0), 20.0, aspect_ratio);
+    let look_from = Point3::new(3.0, 3.0, 2.0);
+    let look_at = Point3::new(0.0, 0.0, -1.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let dist_to_focus = (look_from - look_at).length();
+    let aperture = 2.0;
+    let camera = Camera::new(look_from, look_at, vup, 20.0, aspect_ratio, aperture,
+                             dist_to_focus);
 
     //render
     writeln!(f, "P3\n{} {}\n255", image_width, image_height).unwrap();
